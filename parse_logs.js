@@ -161,6 +161,39 @@ function buildOutput( outputCallback ) {
 	outputCallback();
 }
 
+/**
+ * Remove the trailing slash from a string.
+ *
+ * @since 0.2.0
+ *
+ * @param {String} str The string (URL, presumably) to check.
+ * @return {String} The (maybe) modified string, sans trailing slash.
+ */
+function untrailingSlashIt(str) {
+	if(str.substr(-1) === '/') {
+		return str.substr(0, str.length - 1);
+	}
+	return str;
+}
+
+/**
+ * Normalize the URL for use in the log parser.
+ *
+ * This will check the URL for trailing slashes and the 'log' path (which gets
+ * appended later so we don't want to double it), then removes them.
+ *
+ * @since 0.2.0
+ *
+ * @param {String} url The URL to check.
+ * @return {String} The (maybe) modified URL.
+ */
+function normalizeUrl(url) {
+	url = url.replace(/log\/?/, '');
+	url = untrailingSlashIt(url);
+
+	return url;
+}
+
 var logPath, logHTML,
 	changesets = [],
 	args = parseArgs(process.argv.slice(2), {
@@ -181,7 +214,11 @@ if ( isNaN(startRevision) || isNaN(stopRevision) ) {
 	process.exit();
 }
 
-logPath = config.tracBaseUrl + "?rev=" + startRevision + "&stop_rev=" + stopRevision + "&limit=" + revisionLimit + "&verbose=on";
+if ( args.url ) {
+	config.tracBaseUrl = args.url.toString();
+}
+
+logPath = normalizeUrl( config.tracBaseUrl ) + "/log?rev=" + startRevision + "&stop_rev=" + stopRevision + "&limit=" + revisionLimit + "&verbose=on";
 
 exports.wpTracLogParse = function(){
 async.series([
