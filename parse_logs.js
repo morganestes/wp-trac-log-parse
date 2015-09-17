@@ -182,6 +182,7 @@ if ( isNaN(startRevision) || isNaN(stopRevision) ) {
 
 logPath = "https://core.trac.wordpress.org/log?rev=" + startRevision + "&stop_rev=" + stopRevision + "&limit=" + revisionLimit + "&verbose=on";
 
+exports.wpTracLogParse = function(){
 async.series([
 	function( logCallback ) {
 		console.log( "Downloading " + logPath );
@@ -199,3 +200,4 @@ async.series([
 	async.apply( gatherComponents ), // Calls buildOutput() on Finish.
 	async.apply( buildOutput )
 ]);
+};
