@@ -6,7 +6,8 @@ var $ = require( "cheerio" ),
 	_ = require( "underscore" ),
 	parseArgs = require( "minimist" ),
 	async = require( "async" ),
-	request = require( "request" );
+	request = require( "request" ),
+	config = require( "./config" );
 
 function buildChangesets( buildCallback ) {
 	console.log( "Downloaded. Processing Changesets." );
@@ -180,7 +181,7 @@ if ( isNaN(startRevision) || isNaN(stopRevision) ) {
 	process.exit();
 }
 
-logPath = "https://core.trac.wordpress.org/log?rev=" + startRevision + "&stop_rev=" + stopRevision + "&limit=" + revisionLimit + "&verbose=on";
+logPath = config.tracBaseUrl + "?rev=" + startRevision + "&stop_rev=" + stopRevision + "&limit=" + revisionLimit + "&verbose=on";
 
 exports.wpTracLogParse = function(){
 async.series([
