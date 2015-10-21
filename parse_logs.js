@@ -176,7 +176,7 @@ var logPath, logHTML,
     revisionLimit = parseInt(args['limit'], 10);
 
 if (isNaN(startRevision) || isNaN(stopRevision)) {
-  console.log("Usage: node parse_logs.js --start=<start_revision> --stop=<revision_to_stop> [--limit=<total_revisions>]\n");
+  console.info("Usage: node parse_logs.js --start=<start_revision> --stop=<revision_to_stop> [--limit=<total_revisions>]\n");
   return;
 }
 
@@ -184,13 +184,13 @@ logPath = 'https://core.trac.wordpress.org/log?rev=' + startRevision + '&stop_re
 
 async.series([
   function (logCallback) {
-    console.log('Downloading ' + logPath);
+    console.log('Downloading %s', logPath);
     request(logPath, function (err, response, html) {
       if (!err && response.statusCode == 200) {
         logHTML = html;
         logCallback();
       } else {
-        console.log('Error Downloading.');
+        console.error('Error downloading %s.', logPath);
         return err;
       }
     });
