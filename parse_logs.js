@@ -1,6 +1,7 @@
 /**
  * Parser for WordPress Trac Logs
  */
+'use strict';
 
 var $ = require('cheerio'),
     _ = require('underscore'),
