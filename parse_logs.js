@@ -71,6 +71,7 @@ function buildChangesets(buildCallback) {
 }
 
 function gatherComponents(gatherCallback) {
+  var component = '';
   var ticketPath = 'https://core.trac.wordpress.org/ticket/';
 
   async.each(changesets, function (changeset, changesetCallback) {
@@ -108,7 +109,8 @@ function buildOutput(outputCallback) {
   var propsOutput,
       changesetOutput = '',
       props = [],
-      categories = {};
+      categories = {},
+      category = '';
 
   async.map(changesets,
       function (item) {
