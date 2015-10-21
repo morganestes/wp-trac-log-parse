@@ -6,7 +6,8 @@ var $ = require('cheerio'),
     _ = require('underscore'),
     parseArgs = require('minimist'),
     async = require('async'),
-    request = require('request');
+    request = require('request'),
+    util = require('util');
 
 function buildChangesets(buildCallback) {
   console.log('Downloaded. Processing Changesets.');
@@ -152,8 +153,7 @@ function buildOutput(outputCallback) {
     return a.toLowerCase().localeCompare(b.toLowerCase());
   }), true);
 
-  propsOutput = 'Thanks to ' + '@' + _.without(props, _.last(props)).join(', @') +
-      ', and @' + _.last(props) + ' for their contributions!';
+  propsOutput = util.format('Thanks to @%s, and @%s for their contributions!', _.without(props, _.last(props)).join(', @'), _.last(props));
 
   // Output!
   console.log(changesetOutput + "\n\n" + propsOutput);
@@ -180,7 +180,10 @@ if (isNaN(startRevision) || isNaN(stopRevision)) {
   return;
 }
 
-logPath = 'https://core.trac.wordpress.org/log?rev=' + startRevision + '&stop_rev=' + stopRevision + '&limit=' + revisionLimit + '&verbose=on';
+logPath = util.format(
+    'https://core.trac.wordpress.org/log?rev=%d&stop_rev=%d&limit=%d&verbose=on',
+    startRevision, stopRevision, revisionLimit
+);
 
 async.series([
   function (logCallback) {
