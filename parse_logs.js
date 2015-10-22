@@ -3,12 +3,12 @@
  */
 'use strict';
 
-var $ = require('cheerio'),
-    _ = require('underscore'),
-    parseArgs = require('minimist'),
-    async = require('async'),
-    request = require('request'),
-    util = require('util');
+var $ = require('cheerio');
+var _ = require('underscore');
+var parseArgs = require('minimist');
+var async = require('async');
+var request = require('request');
+var util = require('util');
 
 function buildChangesets(buildCallback) {
   console.log('Downloaded. Processing Changesets.');
@@ -17,8 +17,10 @@ function buildChangesets(buildCallback) {
 
   // Each Changeset has two Rows. We Parse them both at once.
   for (var i = 0; i < logEntries.length; i += 2) {
-    var changeset = {},
-        props, description, related;
+    var changeset = {};
+    var props;
+    var description;
+    var related;
 
     if (logEntries[i + 1] == null) {
       break;
@@ -106,11 +108,11 @@ function gatherComponents(gatherCallback) {
 
 function buildOutput(outputCallback) {
   // Reconstitute Log and Collect Props
-  var propsOutput,
-      changesetOutput = '',
-      props = [],
-      categories = {},
-      category = '';
+  var propsOutput;
+  var changesetOutput = '';
+  var props = [];
+  var categories = {};
+  var category = '';
 
   async.map(changesets,
       function (item) {
@@ -163,20 +165,21 @@ function buildOutput(outputCallback) {
   outputCallback();
 }
 
-var logPath, logHTML,
-    changesets = [],
-    args = parseArgs(process.argv.slice(2), {
-      'alias': {
-        'start': ['to'],
-        'stop': ['from']
-      },
-      'default': {
-        'limit': 400
-      }
-    }),
-    startRevision = parseInt(args['start'], 10),
-    stopRevision = parseInt(args['stop'], 10),
-    revisionLimit = parseInt(args['limit'], 10);
+var logPath;
+var logHTML;
+var changesets = [];
+var args = parseArgs(process.argv.slice(2), {
+  'alias': {
+    'start': ['to'],
+    'stop': ['from']
+  },
+  'default': {
+    'limit': 400
+  }
+});
+var startRevision = parseInt(args.start, 10);
+var stopRevision = parseInt(args.stop, 10);
+var revisionLimit = parseInt(args.limit, 10);
 
 if (isNaN(startRevision) || isNaN(stopRevision)) {
   console.info("Usage: node parse_logs.js --start=<start_revision> --stop=<revision_to_stop> [--limit=<total_revisions>]\n");
