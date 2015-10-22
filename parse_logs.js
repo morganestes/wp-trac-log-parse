@@ -79,7 +79,7 @@ function gatherComponents(gatherCallback) {
   async.each(changesets, function (changeset, changesetCallback) {
         async.each(changeset.related, function (ticket, relatedCallback) {
           request(ticketPath + ticket, function (err, response, body) {
-            if (!err && response.statusCode == 200) {
+            if (!err && response.statusCode === 200) {
               component = $.load(body)('#h_component').next('td').text().trim();
               changeset.component.push(component);
             }
@@ -144,7 +144,7 @@ function buildOutput(outputCallback) {
 
       // Sometimes Committers write their own code.
       // When this happens, there are no additional props.
-      if (changeset.props.length != 0) {
+      if (changeset.props.length !== 0) {
         props = props.concat(changeset.props);
       }
 
@@ -195,7 +195,7 @@ async.series([
   function (logCallback) {
     console.log('Downloading %s', logPath);
     request(logPath, function (err, response, html) {
-      if (!err && response.statusCode == 200) {
+      if (!err && response.statusCode === 200) {
         logHTML = html;
         logCallback();
       } else {
