@@ -9,9 +9,11 @@ var parseArgs = require('minimist');
 var async = require('async');
 var request = require('request');
 var util = require('util');
+var sectionBreak = '\n--------\n';
 
 function buildChangesets(buildCallback) {
-  console.log('Downloaded. Processing Changesets.');
+  console.info('Downloaded. Processing Changesets.');
+  console.log(sectionBreak);
 
   var logEntries = $.load(logHTML)('tr.verbose');
 
@@ -147,8 +149,6 @@ function buildOutput(outputCallback) {
       }
 
     });
-
-    changesetOutput += "\n";
   });
 
   // Collect Props and sort them.
@@ -159,7 +159,8 @@ function buildOutput(outputCallback) {
   propsOutput = util.format('Thanks to @%s, and @%s for their contributions!', _.without(props, _.last(props)).join(', @'), _.last(props));
 
   // Output!
-  console.log(changesetOutput + "\n\n" + propsOutput);
+  console.log('## Code Changes\n\n%s', changesetOutput);
+  console.log('## Props\n\n%s', propsOutput);
   outputCallback();
 }
 
@@ -180,8 +181,7 @@ var stopRevision = parseInt(args.stop, 10);
 var revisionLimit = parseInt(args.limit, 10);
 
 if (isNaN(startRevision) || isNaN(stopRevision)) {
-  console.info("Usage: node parse_logs.js --start=<start_revision> --stop=<revision_to_stop> [--limit=<total_revisions>]\n");
-  return;
+  return console.info('Usage: node parse_logs.js --start=<start_revision> --stop=<revision_to_stop> [--limit=<total_revisions>]\n');
 }
 
 logPath = util.format(
@@ -191,14 +191,13 @@ logPath = util.format(
 
 async.series([
   function (logCallback) {
-    console.log('Downloading %s', logPath);
+    console.info('Downloading from %s', logPath);
     request(logPath, function (err, response, html) {
-      if (!err && response.statusCode === 200) {
+      if (!err && response.statusCode === 202) {
         logHTML = html;
         logCallback();
       } else {
-        console.error('Error downloading %s.', logPath);
-        return err;
+        return console.error('Error downloading:', err);
       }
     });
   },
