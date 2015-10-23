@@ -15,7 +15,7 @@ const SECTION_BREAK = '\n--------\n';
 
 var logHTML = '';
 var changesets = [];
-var args = parseArgs(process.argv.slice(2), {
+var defaultArgs = {
   'alias': {
     'start': ['to'],
     'stop': ['from']
@@ -23,7 +23,8 @@ var args = parseArgs(process.argv.slice(2), {
   'default': {
     'limit': 400
   }
-});
+};
+var args = parseArgs(process.argv.slice(2), defaultArgs );
 var startRevision = parseInt(args.start, 10);
 var stopRevision = parseInt(args.stop, 10);
 var revisionLimit = parseInt(args.limit, 10);
