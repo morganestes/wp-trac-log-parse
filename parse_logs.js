@@ -90,8 +90,7 @@ function gatherComponents(gatherCallback) {
             // TODO: Pick best category for this changeset.
             changesetCallback();
           } else {
-            console.log('ERROR:');
-            console.dir(err);
+            console.error('ERROR: %s', err);
           }
         });
       },
@@ -100,8 +99,7 @@ function gatherComponents(gatherCallback) {
           gatherCallback();
           //buildOutput();
         } else {
-          console.log('ERROR:');
-          console.dir(err);
+          console.error('ERROR: %s', err);
         }
       });
 }
