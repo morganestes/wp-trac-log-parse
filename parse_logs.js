@@ -3,17 +3,42 @@
  */
 'use strict';
 
-var $ = require('cheerio');
-var _ = require('underscore');
-var parseArgs = require('minimist');
-var async = require('async');
-var request = require('request');
-var util = require('util');
-var sectionBreak = '\n--------\n';
+// Normally we'd declare constants as UPPERCASE, but not for required modules.
+const $ = require('cheerio');
+const _ = require('underscore');
+const parseArgs = require('minimist');
+const async = require('async');
+const request = require('request');
+const util = require('util');
+
+const SECTION_BREAK = '\n--------\n';
+
+var logHTML = '';
+var changesets = [];
+var args = parseArgs(process.argv.slice(2), {
+  'alias': {
+    'start': ['to'],
+    'stop': ['from']
+  },
+  'default': {
+    'limit': 400
+  }
+});
+var startRevision = parseInt(args.start, 10);
+var stopRevision = parseInt(args.stop, 10);
+var revisionLimit = parseInt(args.limit, 10);
+var logPath = util.format(
+    'https://core.trac.wordpress.org/log?rev=%d&stop_rev=%d&limit=%d&verbose=on',
+    startRevision, stopRevision, revisionLimit
+);
+
+if (isNaN(startRevision) || isNaN(stopRevision)) {
+  return console.info('Usage: node parse_logs.js --start=<start_revision> --stop=<revision_to_stop> [--limit=<total_revisions>]\n');
+}
 
 function buildChangesets(buildCallback) {
   console.info('Downloaded. Processing Changesets.');
-  console.log(sectionBreak);
+  console.log(SECTION_BREAK);
 
   var logEntries = $.load(logHTML)('tr.verbose');
 
@@ -164,36 +189,11 @@ function buildOutput(outputCallback) {
   outputCallback();
 }
 
-var logPath;
-var logHTML;
-var changesets = [];
-var args = parseArgs(process.argv.slice(2), {
-  'alias': {
-    'start': ['to'],
-    'stop': ['from']
-  },
-  'default': {
-    'limit': 400
-  }
-});
-var startRevision = parseInt(args.start, 10);
-var stopRevision = parseInt(args.stop, 10);
-var revisionLimit = parseInt(args.limit, 10);
-
-if (isNaN(startRevision) || isNaN(stopRevision)) {
-  return console.info('Usage: node parse_logs.js --start=<start_revision> --stop=<revision_to_stop> [--limit=<total_revisions>]\n');
-}
-
-logPath = util.format(
-    'https://core.trac.wordpress.org/log?rev=%d&stop_rev=%d&limit=%d&verbose=on',
-    startRevision, stopRevision, revisionLimit
-);
-
 async.series([
   function (logCallback) {
     console.info('Downloading from %s', logPath);
     request(logPath, function (err, response, html) {
-      if (!err && response.statusCode === 202) {
+      if (!err && response.statusCode === 200) {
         logHTML = html;
         logCallback();
       } else {
