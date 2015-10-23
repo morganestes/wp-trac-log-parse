@@ -3,43 +3,80 @@
  */
 'use strict';
 
+// Option parsing
+const ARGS = [
+  {
+    name: 'start',
+    alias: ['to', 'newest'],
+    abbr: 't',
+    help: 'The most recent changeset (commit) number.'
+  },
+  {
+    name: 'stop',
+    alias: ['from', 'oldest'],
+    abbr: 'f',
+    help: 'The oldest changeset (commit) number.'
+  },
+  {
+    name: 'limit',
+    alias: ['max'],
+    abbr: 'x',
+    'default': 400,
+    help: 'The maximum number of changesets to retrieve.'
+  },
+  {
+    name: 'version',
+    abbr: 'v',
+    help: 'Displays the version information for the script.'
+  }
+];
+const md = {
+  heading: '##',
+  subhead: '###',
+  line: '------',
+  nl: ''
+};
+
 // Normally we'd declare constants as UPPERCASE, but not for required modules.
 const $ = require('cheerio');
 const _ = require('underscore');
-const parseArgs = require('minimist');
 const async = require('async');
 const request = require('request');
 const util = require('util');
-
-const SECTION_BREAK = '\n--------\n';
+const app = require('./package');
+const cliOpts = require('cliclopts')(ARGS);
+const args = require('minimist')(process.argv.slice(2), cliOpts.options());
 
 var logHTML = '';
 var changesets = [];
-var defaultArgs = {
-  'alias': {
-    'start': ['to'],
-    'stop': ['from']
-  },
-  'default': {
-    'limit': 400
-  }
-};
-var args = parseArgs(process.argv.slice(2), defaultArgs );
+
 var startRevision = parseInt(args.start, 10);
 var stopRevision = parseInt(args.stop, 10);
-var revisionLimit = parseInt(args.limit, 10);
+var revisionLimit = parseInt(args.max, 10);
 var logPath = util.format(
     'https://core.trac.wordpress.org/log?rev=%d&stop_rev=%d&limit=%d&verbose=on',
     startRevision, stopRevision, revisionLimit
 );
+console.dir(args, {colors: true});
+if (args.help || args.h) {
+  console.info('Usage: command [options]');
+  cliOpts.print();
+  process.exit();
+}
 
-if (isNaN(startRevision) || isNaN(stopRevision)) {
-  return console.info('Usage: node parse_logs.js --start=<start_revision> --stop=<revision_to_stop> [--limit=<total_revisions>]\n');
+if (args.version || args.v) {
+  console.info('%s v%s', app.name, app.version);
+  process.exit();
+}
+
+if (isNaN(startRevision) || isNaN(stopRevision) || isNaN(revisionLimit)) {
+  console.info('Usage: node parse_logs.js --start=<start_revision> --stop=<revision_to_stop> [--limit=<total_revisions>]\n');
+  process.exit();
 }
 
 function buildChangesets(buildCallback) {
   console.info('Downloaded. Processing Changesets.');
-  console.log(SECTION_BREAK);
+  console.info('%s\n', md.line);
 
   var logEntries = $.load(logHTML)('tr.verbose');
 
