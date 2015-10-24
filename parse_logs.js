@@ -155,12 +155,18 @@ function buildChangesets(buildCallback) {
     changeset.description = changeset.description.replace(/\nSee(.*)/i, '');
 
     // Extract Props
-    var propsRegex = /\nProps(.*)./i;
+    var propsRegex = /(?:Props:?\s+)(.*)\.?/mi;
     changeset.props = [];
 
     props = changeset.description.match(propsRegex);
     if (props !== null) {
-      changeset.props = props[1].trim().split(/\s*,\s*/);
+      console.info.debug('props');
+      console.dir.debug(props[1]);
+
+      changeset.props = cleanProps(props[1]);
+
+      console.info.debug(changeset.revision);
+      console.dir.debug(changeset.props, {colors: true});
     }
 
     // Remove Props
@@ -263,6 +269,25 @@ function buildOutput(outputCallback) {
   console.log('## Code Changes\n\n%s', changesetOutput);
   console.log('## Props\n\n%s', propsOutput);
   outputCallback();
+}
+
+/**
+ * Takes a string of names from the Props line in a changeset
+ * and cleans it up for further use.
+ *
+ * @param {String} props The list of names from a changeset.
+ * @return {Array} The (maybe) cleaned up list of names as an array.
+ */
+function cleanProps(props) {
+  var _props = props
+      .replace(/(for.*(,))/ig, '') //for the thing, anothername
+      .replace(/(for.*(\.))/, '') //for the thing.
+      .replace(/\./gmi, '')
+      .trim()
+      .replace(/\s/g, ',')
+      .split(/\s*,\s*/);
+
+  return _.without(_props, '');
 }
 
 async.series([
