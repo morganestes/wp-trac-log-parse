@@ -59,12 +59,18 @@ var logPath = util.format(
 );
 console.dir(args, {colors: true});
 if (args.help || args.h) {
+if (args.help) {
   console.info('Usage: command [options]');
   cliOpts.print();
+
+  console.info('\nExamples:');
+  console.info('%s --start 35000 --stop 34800', app.name);
+  console.info('%s --from 34800 --to 35000 --max 100', app.name);
+
   process.exit();
 }
 
-if (args.version || args.v) {
+if (args.version) {
   console.info('%s v%s', app.name, app.version);
   process.exit();
 }
