@@ -15,5 +15,6 @@
   "node": true,
   "strict": true,
   "esnext": true,
-  "white": true
+  "white": true,
+  "-W014": false
 }

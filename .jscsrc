@@ -35,5 +35,7 @@
   },
   "requireSpacesInsideObjectBrackets": "all",
   "disallowSpacesInsideParentheses": true,
-  "disallowNewlineBeforeBlockStatements": true
+  "disallowNewlineBeforeBlockStatements": true,
+  "requireMultiLineTernary": true,
+  "requireMultiLineConditional": true
 }
