@@ -28,6 +28,11 @@ const ARGS = [
     name: 'version',
     abbr: 'v',
     help: 'Displays the version information for the script.'
+  },
+  {
+    name: 'debug',
+    boolean: true,
+    help: 'Displays debugging info while running.'
   }
 ];
 const md = {
@@ -57,8 +62,35 @@ var logPath = util.format(
     'https://core.trac.wordpress.org/log?rev=%d&stop_rev=%d&limit=%d&verbose=on',
     startRevision, stopRevision, revisionLimit
 );
-console.dir(args, {colors: true});
-if (args.help || args.h) {
+
+/**
+ * Extend the console object to add .debug().
+ *
+ * If a console method is called with an added .debug after it,
+ * it will only be run if the debug flag is set on the command line.
+ *
+ * @example console.log('Text') // always prints
+ * @example console.log.debug('Text') // only prints if --debug set
+ *
+ * @returns {Console}
+ */
+(function consoleDebug() {
+  ['info', 'log', 'error', 'warn', 'dir']
+      .forEach(function (method) {
+        if (typeof method === 'function') {
+          console[method].prototype.debug = function () {
+            return console[method];
+          };
+        }
+        console[method].debug = args.debug
+            ? this.call(console[method], console)
+            : function () {
+        };
+      }, Function.prototype.bind);
+})();
+
+console.dir.debug(args, {colors: true});
+
 if (args.help) {
   console.info('Usage: command [options]');
   cliOpts.print();
