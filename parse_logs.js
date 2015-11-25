@@ -46,6 +46,7 @@ const md = {
 const $ = require('cheerio');
 const _ = require('underscore');
 const async = require('async');
+const https = require('https');
 const request = require('request');
 const util = require('util');
 const app = require('./package');
@@ -62,6 +63,7 @@ var logPath = util.format(
     'https://core.trac.wordpress.org/log?rev=%d&stop_rev=%d&limit=%d&verbose=on',
     startRevision, stopRevision, revisionLimit
 );
+
 
 /**
  * Extend the console object to add .debug().
@@ -90,8 +92,9 @@ var logPath = util.format(
 })();
 
 console.dir.debug(args, {colors: true});
+console.dir.debug(process, {colors: true});
 
-if (args.help) {
+if (args.help || isInvalidOptions(args)) {
   console.info('Usage: command [options]');
   cliOpts.print();
 
@@ -107,9 +110,12 @@ if (args.version) {
   process.exit();
 }
 
-if (isNaN(startRevision) || isNaN(stopRevision) || isNaN(revisionLimit)) {
-  console.info('Usage: node parse_logs.js --start=<start_revision> --stop=<revision_to_stop> [--limit=<total_revisions>]\n');
-  process.exit();
+function isInvalidOptions(args) {
+  return (
+      isNaN(startRevision) ||
+      isNaN(stopRevision) ||
+      isNaN(revisionLimit)
+  );
 }
 
 function buildChangesets(buildCallback) {
@@ -263,10 +269,27 @@ function buildOutput(outputCallback) {
     return a.toLowerCase().localeCompare(b.toLowerCase());
   }), true);
 
-  propsOutput = util.format('Thanks to @%s, and @%s for their contributions!', _.without(props, _.last(props)).join(', @'), _.last(props));
+  console.dir.debug(props);
+  var invalidUserNames = _.map(props, function parseProps(username, key, list) {
+    if (hasUserProfile(username)) {
+      console.log.debug('user is valid: %s', username);
+      return username;
+    }
+  });
+
+  console.log.debug(hasUserProfile('jessicaestes'));
+
+  console.log.debug(md.nl + md.line + md.nl);
+  console.dir.debug(invalidUserNames, {colors: true});
+
+  propsOutput = util.format(
+      'Thanks to @%s, and @%s for their contributions!',
+      _.without(props, _.last(props)).join(', @'),
+      _.last(props)
+  );
 
   // Output!
-  console.log('## Code Changes\n\n%s', changesetOutput);
+  //console.log('## Code Changes\n\n%s', changesetOutput);
   console.log('## Props\n\n%s', propsOutput);
   outputCallback();
 }
@@ -288,6 +311,51 @@ function cleanProps(props) {
       .split(/\s*,\s*/);
 
   return _.without(_props, '');
+}
+
+function hasUserProfile(username) {
+  var options = {
+    baseUrl: 'https://profiles.wordpress.org/',
+    uri: '/' + encodeURIComponent(username),
+    followRedirect: false,
+    agent: false,
+    method: 'HEAD',
+    headers: {
+      'User-Agent': util.format('%s %s; node.js %s; request %s', app.name, app.version, process.version, request.version)
+    }
+  };
+
+  function isGood(results) {
+    return results;
+  }
+
+  function makeCall(options, callback) {
+    //request.debug = true;
+    request
+        .get(options)
+        .on('error', function processError(err) {
+          console.error(err);
+        })
+        .on('response', function processResponse(response) {
+          console.log.debug('checking validity of %s', username);
+          if (response.statusCode === 200) {
+            console.dir.debug('*' + response.statusCode + ':' + username, {colors: true});
+            callback(true);
+          } else {
+            console.warn.debug('%d:%s', response.statusCode, username);
+            callback(false);
+          }
+        })
+        .on('close', callback());
+  }
+
+  var good = makeCall(options, function cb(results) {
+    console.log.debug(results);
+    return results;
+  });
+
+  console.log.debug(good);
+
 }
 
 async.series([

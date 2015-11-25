@@ -16,9 +16,9 @@
     "cheerio": ">=0.18.0",
     "cliclopts": "^1.1.1",
     "minimist": ">=1.1.0",
-    "request": ">=2.51.0",
+    "request": ">=2.65.0",
     "underscore": ">=1.7.0"
   },
   "license": "MIT",
-  "engine": "node >= 0.4.1"
+  "engine": "node >= 0.12.x"
 }

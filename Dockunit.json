@@ -1,0 +1,8 @@
+{
+	"containers": [{
+		"prettyName": "nodejs 4.2.1",
+		"image": "dockunit/prebuilt-images:nodejs-mongodb-mocha-jasmine-4.2.1",
+		"testCommand": "node parse_logs.js",
+		"beforeScripts": ["npm install"]
+	}]
+}
