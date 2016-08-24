@@ -12,7 +12,7 @@
     "url": "https://github.com/getsource/wp-trac-log-parse/issues"
   },
   "dependencies": {
-    "cheerio": ">=0.18.0",
+    "cheerio": ">=0.22.0",
     "underscore": ">=1.7.0",
     "minimist": ">=1.1.0",
     "request": ">=2.51.0",
